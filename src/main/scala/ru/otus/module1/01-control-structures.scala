@@ -56,6 +56,13 @@ object controlStructures {
   // присвойте его в значение х3
 
 
+var cond = true
+
+val x3: Any = if (cond) {
+    println("yes")
+} else {
+    "no"
+}
 
 
   /**
