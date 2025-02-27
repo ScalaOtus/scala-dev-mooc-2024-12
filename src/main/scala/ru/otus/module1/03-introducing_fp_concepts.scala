@@ -194,6 +194,12 @@ object hof{
    *
    * Реализовать метод printIfAny, который будет печатать значение, если оно есть
    */
+  def printIfAny[T](option: Option[T]): Any = {
+    option match {
+      case Some(value) => println(value)
+      case None =>
+    }
+  }
 
 
   /**
@@ -201,12 +207,26 @@ object hof{
    * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
    */
 
+  def zip[A, B](optA: Option[A], optB: Option[B]): Option[(A, B)] = {
+    (optA, optB) match {
+      case (Some(a), Some(b)) => Some((a, b))
+      case _ => None
+    }
+  }
+
 
   /**
    *
    * Реализовать метод filter, который будет возвращать не пустой Option
    * в случае если исходный не пуст и предикат от значения = true
    */
+
+  def filter[T](option: Option[T])(predicate: T => Boolean): Option[T] = {
+    option match {
+      case Some(value) if predicate(value) => Option(value)
+      case _ => None
+    }
+  }
 
  }
 
@@ -244,33 +264,83 @@ object hof{
       * def printArgs(args: Int*) = args.foreach(println(_))
       */
 
-    /**
-      *
-      * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
-      */
+    implicit class ListOps[T](list: List[T]) {
+      def mkString(separator: String = ""): String = {
+        @tailrec
+        def loop(lst: List[T], sum: String): String = lst match {
+          case Nil => sum
+          case ::(head, Nil) => sum + head
+          case ::(head, tail) => loop(tail, sum + head + separator)
+        }
 
-    /**
-      *
-      * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
-      */
+        loop(list, "")
+      }
+
+      /**
+       *
+       * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
+       */
+
+      def ++(other: List[T]): List[T] = list match {
+        case Nil => other
+        case ::(head, tail) => ::(head, tail ++ other)
+      }
+
+      def reverse(): List[T] = {
+        @tailrec
+        def loop(plain: List[T], reversed: List[T]): List[T] = plain match {
+          case Nil => reversed
+          case ::(head, tail) => loop(tail, ::(head, reversed))
+        }
+
+        loop(list, List())
+      }
 
 
-    /**
-      *
-      * Реализовать метод filter для списка который будет фильтровать список по некому условию
-      */
+      /**
+       *
+       * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
+       */
+      def map[B](f: T => B): List[B] = {
+        list match {
+          case Nil => Nil
+          case ::(head, tail) => ::(f(head), tail.map(f))
+        }
+      }
 
-    /**
-      *
-      * Написать функцию incList котрая будет принимать список Int и возвращать список,
-      * где каждый элемент будет увеличен на 1
-      */
+      /**
+       *
+       * Реализовать метод filter для списка который будет фильтровать список по некому условию
+       */
+      def filter(f: T => Boolean): List[T] = {
+        list match {
+          case Nil => Nil
+          case ::(head, tail) => if (f(head)) ::(head, tail.filter(f)) else tail.filter(f)
+        }
+      }
+    }
 
+   /**
+    *
+    * Написать функцию incList котрая будет принимать список Int и возвращать список,
+    * где каждый элемент будет увеличен на 1
+    */
+   def incList(list: List[Int]): List[Int] = {
+     list match {
+       case Nil => Nil
+       case ::(head, tail) => ::(head + 1, incList(tail))
+     }
+   }
 
-    /**
-      *
-      * Написать функцию shoutString котрая будет принимать список String и возвращать список,
-      * где к каждому элементу будет добавлен префикс в виде '!'
-      */
-
+   /**
+    *
+    * Написать функцию shoutString котрая будет принимать список String и возвращать список,
+    * где к каждому элементу будет добавлен префикс в виде '!'
+    */
+   def shoutString(list: List[String]): List[String] = {
+     list match {
+       case Nil => Nil
+       case ::(head, tail) => ::("!" + head, shoutString(tail))
+     }
+   }
  }
