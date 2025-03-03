@@ -20,7 +20,15 @@ object task_futures_sequence {
    * @return асинхронную задачу с кортежом из двух списков
    */
   def fullSequence[A](futures: List[Future[A]])
-                     (implicit ex: ExecutionContext): Future[(List[A], List[Throwable])] =
-    task"Реализуйте метод `fullSequence`" ()
+                     (implicit ex: ExecutionContext): Future[(List[A], List[Throwable])] = {
+    Future.foldLeft(
+      futures.map { future => future.map(Left(_)).recover(Right(_)) }
+    )(List[A]() -> List[Throwable]()){ (acc, futureRes) =>
+      futureRes match {
+        case Left(value) => (acc._1 ++ List(value)) -> acc._2
+        case Right(exception) => acc._1 -> (List(exception) ++ acc._2)
+      }
+    }
+  }
 
 }
